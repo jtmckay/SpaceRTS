@@ -7,6 +7,7 @@ import createObjectManager from 'bjs/objectManager'
 import TacticalOveraly from 'components/tacticalOverlay'
 import Background from 'components/background'
 import Settings from 'components/settings'
+import Ships from 'components/ships'
 
 const StyledGamePage = styled.div`
     width: 100%;
@@ -64,8 +65,9 @@ class GamePage extends React.Component {
             camera = createArcRotateCamera(scene)
             camera.attachControl(canvas, false, false, false)
             createHemisphericLight(scene)
-
-            this.setState({ babylon: { ...this.state.babylon, scene, camera, canvas } })
+            var cameraTransformNode = new BABYLON.TransformNode("root")
+            cameraTransformNode.position = camera.target
+            this.setState({ babylon: { ...this.state.babylon, scene, camera, canvas, cameraTransformNode } })
             return scene
         }
 
@@ -114,8 +116,11 @@ class GamePage extends React.Component {
                 {this.state.babylon.scene &&
                     <NoDisplay>
                         <Background babylon={this.state.babylon} />
+                        <Ships babylon={this.state.babylon} />
                         {this.state.settings.tacticalOverlay &&
-                            <TacticalOveraly babylon={this.state.babylon} />
+                            <TacticalOveraly
+                                babylon={this.state.babylon}
+                                />
                         }
                     </NoDisplay>
                 }

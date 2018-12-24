@@ -27,7 +27,12 @@ export default function createObjectManager () {
         objectIds.splice(0, objectIds.length)
     }
 
+    function getAll () {
+        return Object.values(objectMap)
+    }
+
     return {
+        getAll,
         add,
         remove,
         removeAll

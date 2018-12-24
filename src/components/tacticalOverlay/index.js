@@ -36,7 +36,7 @@ function createTactialNotches (meshBuilder, outterLimit, innerLimit, interval, s
         const startingPoints = getPoints(tracker)
         startingPoints.forEach(point => {
             if (point.x) {
-                meshBuilder.createLines({
+                const test = meshBuilder.createLines({
                     points: [
                         new BABYLON.Vector3(point.x, 0, -size),
                         new BABYLON.Vector3(point.x, 0, 0)
@@ -90,12 +90,15 @@ class TacticalOverlay extends React.Component {
     objectManager = createObjectManager()
 
     componentDidMount () {
-        const { scene } = this.props.babylon
+        const { scene, cameraTransformNode } = this.props.babylon
         const meshBuilder = createMeshBuilder(scene, this.objectManager)
         const outterLimit = 300
         const innerLimit = 10
         createTactialNotches(meshBuilder, outterLimit, innerLimit, 100, 4)
-        createTactialNotches(meshBuilder, outterLimit, innerLimit, 20, 1)
+        createTactialNotches(meshBuilder,  outterLimit, innerLimit, 20, 1)
+        this.objectManager.getAll().forEach(obj => {
+            obj.parent = cameraTransformNode
+        })
     }
 
     componetWillUnmount () {
