@@ -1,4 +1,5 @@
 import React from 'react'
+import io from 'socket.io-client';
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import { createArcRotateCamera } from 'bjs/camera'
@@ -52,6 +53,8 @@ class GamePage extends React.Component {
     }
 
     componentDidMount () {
+        const socket = io('http://localhost:3080');
+
         // Get the canvas DOM element
         const canvas = document.getElementById('renderCanvas')
         let camera
@@ -67,7 +70,14 @@ class GamePage extends React.Component {
             createHemisphericLight(scene)
             var cameraTransformNode = new BABYLON.TransformNode("root")
             cameraTransformNode.position = camera.target
-            this.setState({ babylon: { ...this.state.babylon, scene, camera, canvas, cameraTransformNode } })
+            this.setState({ babylon: {
+                ...this.state.babylon,
+                scene,
+                camera,
+                canvas,
+                cameraTransformNode,
+                socket
+            } })
             return scene
         }
 
