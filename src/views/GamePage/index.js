@@ -1,5 +1,5 @@
 import React from 'react'
-import io from 'socket.io-client';
+import io from 'socket.io-client'
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import { createArcRotateCamera } from 'bjs/camera'
@@ -53,7 +53,7 @@ class GamePage extends React.Component {
     }
 
     componentDidMount () {
-        const socket = io('http://localhost:3080');
+        const socket = io('http://localhost:3080')
 
         // Get the canvas DOM element
         const canvas = document.getElementById('renderCanvas')

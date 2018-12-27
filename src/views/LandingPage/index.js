@@ -25,7 +25,7 @@ class LandingPage extends React.Component {
             <StyledLandingPage>
                 <StyledWelcome>Welcome to Space RTS!</StyledWelcome>
                 <StyledLink>
-                    <Link to='game'>Let's Go!</Link>
+                    <Link to='lobby'>Let's Go!</Link>
                 </StyledLink>
             </StyledLandingPage>
         )
