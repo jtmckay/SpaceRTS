@@ -26,7 +26,7 @@ export default function createMeshBuilder (scene, objectManager) {
     }
     
     //BABYLON.Mesh.FRONTSIDE
-    function createSphere(options: {
+    function createSphere (options: {
         diameterX: number,
         diameterY: number,
         position: BABYLON.Vector3,
@@ -51,7 +51,7 @@ export default function createMeshBuilder (scene, objectManager) {
         //ON MOUSE ENTER
         sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function (event) {
             oldColor = sphere.material.emissiveColor
-            sphere.material.emissiveColor = BABYLON.Color3.Blue()
+            sphere.material.emissiveColor = BABYLON.Color3.White()
         }));
     
         //ON MOUSE EXIT
@@ -64,9 +64,35 @@ export default function createMeshBuilder (scene, objectManager) {
         return sphere
     }
 
+    function createBox (options: {
+        size: number,
+        width: number,
+        height: number,
+        depth: number,
+        position: BABYLON.Vector3,
+        material: BABYLON.Material
+    }) {
+        const id = uuid()
+        const square = BABYLON.MeshBuilder.CreateBox(id, options, scene)
+        if (options.position) {
+            square.position = options.position
+        }
+        if (options.material) {
+            square.material = options.material
+        } else {
+            square.material = new BABYLON.StandardMaterial('square', scene)
+            console.log('Missing color for square')
+        }
+
+        objectManager.add(id, square)
+
+        return square
+    }
+
     return {
         createPlane,
         createLines,
-        createSphere
+        createSphere,
+        createBox
     }
 }

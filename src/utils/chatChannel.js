@@ -18,10 +18,8 @@ export function joinChannel (socket, channel, iam, parent) {
     //     setState({ users: [...state.users.filter(i => i.id !== user.id)] })
     // })
     socket.on('chat_message_list_' + channel, messageList => {
-        console.log('got list', messageList)
         parent.setState({ messages: messageList })
         if (parent.scroll && parent.scroll.current) {
-            console.log(parent.scroll.current)
             parent.scroll.current.scrollTop = parent.scroll.current.scrollHeight
         }
     })

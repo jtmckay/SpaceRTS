@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { getLocalStorage } from 'utils/localStorage'
-import withSocket from 'containers/withSocket'
+import withLobbySocket from 'containers/withLobbySocket'
 import Chat from 'components/chat'
 
 const StyledLobbyPage = styled.div`
@@ -100,4 +100,4 @@ class LobbyPage extends React.Component {
     }
 }
 
-export default withSocket(LobbyPage)
+export default withLobbySocket(LobbyPage)

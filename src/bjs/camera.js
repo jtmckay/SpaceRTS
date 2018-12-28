@@ -1,10 +1,11 @@
 import * as BABYLON from 'babylonjs'
 
 function createArcRotateCamera (scene: BABYLON.Scene, target: BABYLON.Vector3) {
-    let camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -Math.PI/2, Math.PI/2, 100, target, scene)
+    let camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", -.6*Math.PI, Math.PI/2.5, 100, target, scene)
     camera.inertia = 0
     camera.lowerRadiusLimit = 10
     camera.upperRadiusLimit = 800
+    camera.maxZ = 1000000
 
     document.addEventListener ('mousewheel', function (event) {
         let newRadius = camera.radius + event.deltaY / 5

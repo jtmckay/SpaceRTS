@@ -57,7 +57,6 @@ class Chat extends React.Component {
     scroll = React.createRef()
 
     componentDidMount () {
-        console.log('this', this.scroll)
         const { sendMessage } = joinChannel(this.props.socket, 'lobby', this.props.iam, this)
         this.sendMessage = sendMessage
     }

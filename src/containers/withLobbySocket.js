@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 import localId from 'utils/localId'
 import { getLocalStorage, setLocalStorage } from 'utils/localStorage'
 
-function withSocket (Component) {
+function withLobbySocket (Component) {
     return class LandingPage extends React.Component {
         state = {
             gamertag: getLocalStorage('gamertag'),
@@ -25,11 +25,9 @@ function withSocket (Component) {
                 this.setState({ users: userList })
             })
             this.socket.on('user_joined', user => {
-                console.log('user joined', user)
                 this.setState({ users: [...this.state.users.filter(i => i.id !== user.id), user] })
             })
             this.socket.on('user_left', user => {
-                console.log('user left', user)
                 this.setState({ users: [...this.state.users.filter(i => i.id !== user.id)] })
             })
         }
@@ -37,6 +35,7 @@ function withSocket (Component) {
         componentWillUnmount () {
             this.socket.close()
         }
+
         render () {
             return <Component
                 {...this.props}
@@ -60,4 +59,4 @@ function withSocket (Component) {
 
 
 
-export default withSocket
+export default withLobbySocket

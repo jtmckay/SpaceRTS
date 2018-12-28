@@ -1,14 +1,17 @@
 import React from 'react'
-import io from 'socket.io-client'
+import withGameSocket from 'containers/withGameSocket'
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import { createArcRotateCamera } from 'bjs/camera'
-import { createHemisphericLight } from 'bjs/light'
+import { createOmniLight } from 'bjs/light'
 import createObjectManager from 'bjs/objectManager'
 import TacticalOveraly from 'components/tacticalOverlay'
 import Background from 'components/background'
 import Settings from 'components/settings'
-import Ships from 'components/ships'
+import Sun from 'components/sun'
+import Planets from 'components/planets'
+import Stations from 'components/stations'
+import * as actions from 'utils/actions'
 
 const StyledGamePage = styled.div`
     width: 100%;
@@ -53,8 +56,6 @@ class GamePage extends React.Component {
     }
 
     componentDidMount () {
-        const socket = io('http://localhost:3080')
-
         // Get the canvas DOM element
         const canvas = document.getElementById('renderCanvas')
         let camera
@@ -67,16 +68,16 @@ class GamePage extends React.Component {
             const scene = new BABYLON.Scene(engine)
             camera = createArcRotateCamera(scene)
             camera.attachControl(canvas, false, false, false)
-            createHemisphericLight(scene)
+            createOmniLight(scene, camera.position, new BABYLON.Color3(.2, .2, .2))
+
             var cameraTransformNode = new BABYLON.TransformNode("root")
-            cameraTransformNode.position = camera.target
+            cameraTransformNode.position = new BABYLON.Vector3(0, 0, 0)
             this.setState({ babylon: {
                 ...this.state.babylon,
                 scene,
                 camera,
                 canvas,
-                cameraTransformNode,
-                socket
+                cameraTransformNode
             } })
             return scene
         }
@@ -119,6 +120,10 @@ class GamePage extends React.Component {
                 {this.state.showSettings &&
                     <Settings
                         babylon={this.state.babylon}
+                        playerCount={this.props.users.length}
+                        gameClock={this.props.gameClock}
+                        startGame={() => actions.startGame(this.props.socket, this.props.setGameClock, this.props.users)}
+                        endGame={() => actions.endGame(this.props.socket, this.props.setGameClock)}
                         closeSettings={() => this.setState({ showSettings: false })}
                         setSettings={settings => this.setState({ settings })}
                         />
@@ -126,7 +131,9 @@ class GamePage extends React.Component {
                 {this.state.babylon.scene &&
                     <NoDisplay>
                         <Background babylon={this.state.babylon} />
-                        <Ships babylon={this.state.babylon} />
+                        <Sun babylon={this.state.babylon} />
+                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} />
+                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} />
                         {this.state.settings.tacticalOverlay &&
                             <TacticalOveraly
                                 babylon={this.state.babylon}
@@ -139,4 +146,4 @@ class GamePage extends React.Component {
     }
 }
 
-export default GamePage
+export default withGameSocket(GamePage)
