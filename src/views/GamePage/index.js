@@ -62,6 +62,7 @@ class GamePage extends React.Component {
         const createScene = () => {
             // Create a basic BJS Scene object
             const scene = new BABYLON.Scene(engine)
+
             camera = createArcRotateCamera(scene)
             camera.attachControl(canvas, false, false, false)
             createOmniLight(scene, camera.position, new BABYLON.Color3(.2, .2, .2))
@@ -93,12 +94,14 @@ class GamePage extends React.Component {
         window.addEventListener('resize', resizeHandler)
         window.addEventListener('keydown', this.handleKeyDown)
         window.addEventListener('click', this.handleMouseDown)
+        window.addEventListener('dblclick', this.handleDoubleMouseDown)
     }
 
     componentWillUnmount () {
         window.removeEventListener('resize', resizeHandler)
         window.removeEventListener('keydown', this.handleKeyDown)
         window.removeEventListener('click', this.handleMouseDown)
+        window.removeEventListener('dblclick', this.handleDoubleMouseDown)
     }
 
     handleKeyDown = ({ key }) => {
@@ -119,6 +122,13 @@ class GamePage extends React.Component {
         if (this.state.dialog.contents) {
             this.closeDialogMenu()
         }
+    }
+
+    handleDoubleMouseDown = (event) => {
+        const intersection = this.state.babylon.scene.pick(event.clientX, event.clientY, function (mesh) {
+            return mesh.name === 'skybox'
+        })
+        console.log('Double!', intersection.pickedPoint)
     }
 
     openDialogMenu = (positionX, positionY, contents) => {
@@ -148,9 +158,9 @@ class GamePage extends React.Component {
                 {this.state.babylon.scene &&
                     <NoDisplay>
                         <Background babylon={this.state.babylon} />
-                        <Sun babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
-                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
-                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
+                        <Sun babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
                         {this.state.settings.tacticalOverlay &&
                             <TacticalOveraly
                                 babylon={this.state.babylon}
