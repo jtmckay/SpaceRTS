@@ -25,7 +25,6 @@ export default function createMeshBuilder (scene, objectManager) {
         return line
     }
     
-    //BABYLON.Mesh.FRONTSIDE
     function createSphere (options: {
         diameterX: number,
         diameterY: number,
@@ -44,20 +43,6 @@ export default function createMeshBuilder (scene, objectManager) {
             sphere.material = new BABYLON.StandardMaterial('sphere', scene)
             console.log('Missing color for sphere')
         }
-    
-        sphere.actionManager = new BABYLON.ActionManager(scene)
-    
-        let oldColor
-        //ON MOUSE ENTER
-        sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function (event) {
-            oldColor = sphere.material.emissiveColor
-            sphere.material.emissiveColor = BABYLON.Color3.White()
-        }));
-    
-        //ON MOUSE EXIT
-        sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function (event) {
-            sphere.material.emissiveColor = oldColor
-        }));
 
         objectManager.add(id, sphere)
 

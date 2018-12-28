@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import { createArcRotateCamera } from 'bjs/camera'
 import { createOmniLight } from 'bjs/light'
-import createObjectManager from 'bjs/objectManager'
+import Dialog from 'components/dialog'
 import TacticalOveraly from 'components/tacticalOverlay'
 import Background from 'components/background'
 import Settings from 'components/settings'
@@ -31,10 +31,15 @@ const NoDisplay = styled.div`
 
 let resizeHandler
 
-class GamePage extends React.Component {
-    objectManager = createObjectManager()
+const dialogDefault = {
+    contents: null,
+    positionX: 0,
+    positionY: 0,
+}
 
+class GamePage extends React.Component {
     state = {
+        dialog: dialogDefault,
         showSettings: false,
         settings: {
             tacticalOverlay: true
@@ -42,17 +47,8 @@ class GamePage extends React.Component {
         babylon: {
             scene: null,
             camera: null,
-            canvas: null,
-            nextFrames: [],
-            callstack: [],
-            objectManager: {}
+            canvas: null
         }
-    }
-
-    move (getMoves) {
-        this.state.babylon.callstack.push(() => {
-            return getMoves()
-        })
     }
 
     componentDidMount () {
@@ -96,27 +92,48 @@ class GamePage extends React.Component {
         }
         window.addEventListener('resize', resizeHandler)
         window.addEventListener('keydown', this.handleKeyDown)
+        window.addEventListener('click', this.handleMouseDown)
     }
 
     componentWillUnmount () {
         window.removeEventListener('resize', resizeHandler)
         window.removeEventListener('keydown', this.handleKeyDown)
+        window.removeEventListener('click', this.handleMouseDown)
     }
 
     handleKeyDown = ({ key }) => {
         console.log('key', key)
         if (key === 'Escape') {
-            this.setState({ showSettings: !this.state.showSettings })
+            if (this.state.dialog.contents) {
+                this.setState({ dialog: dialogDefault })
+            } else {
+                this.setState({ showSettings: !this.state.showSettings })
+            }
         }
         if (key === 'F10') {
             this.setState({ showSettings: !this.state.showSettings })
         }
     }
 
+    handleMouseDown = () => {
+        if (this.state.dialog.contents) {
+            this.closeDialogMenu()
+        }
+    }
+
+    openDialogMenu = (positionX, positionY, contents) => {
+        this.setState({ dialog: { positionX, positionY, contents } })
+    }
+
+    closeDialogMenu = () => {
+        this.setState({ dialog: dialogDefault })
+    }
+
     render () {
         return (
             <StyledGamePage>
                 <StyledCanvas id="renderCanvas"></StyledCanvas>
+                <Dialog {...this.state.dialog} />
                 {this.state.showSettings &&
                     <Settings
                         babylon={this.state.babylon}
@@ -131,9 +148,9 @@ class GamePage extends React.Component {
                 {this.state.babylon.scene &&
                     <NoDisplay>
                         <Background babylon={this.state.babylon} />
-                        <Sun babylon={this.state.babylon} />
-                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} />
-                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} />
+                        <Sun babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
+                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
+                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} closeDialogMenu={this.closeDialogMenu} />
                         {this.state.settings.tacticalOverlay &&
                             <TacticalOveraly
                                 babylon={this.state.babylon}
