@@ -1,21 +1,21 @@
 import React from 'react'
 import BABYLON from 'babylonjs'
-import createObjectManager from 'bjs/objectManager'
+import createMeshManager from 'bjs/meshManager'
 import createMeshBuilder from 'bjs/mesh'
 import createMaterialBuilder from 'bjs/material'
 import { StyledMenu, StyledMenuOption } from 'components/dialog/styles'
 
-class Planets extends React.Component {
-    objectManager = createObjectManager()
+class Stations extends React.Component {
+    meshManager = createMeshManager()
 
     componentDidMount () {
         const { openDialogMenu } = this.props
         const { scene, camera, cameraTransformNode } = this.props.babylon
-        const meshBuilder = createMeshBuilder(scene, this.objectManager)
-        const materialBuilder = createMaterialBuilder(scene, this.objectManager)
+        const meshBuilder = createMeshBuilder(scene, this.meshManager)
+        const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        this.props.socket.on('station', ({ owner, size, color, position }) => {
-            const stationMesh = meshBuilder.createBox({
+        this.props.socket.on('station', ({ id, owner, size, color, position }) => {
+            const stationMesh = meshBuilder.createBox(id, {
                 size,
                 material: materialBuilder.createStandardMaterial({ emissiveColor: color }),
                 position: new BABYLON.Vector3(position[0], position[1], position[2])
@@ -23,19 +23,24 @@ class Planets extends React.Component {
 
             stationMesh.actionManager = new BABYLON.ActionManager(scene)
 
-            //ON MOUSE ENTER
+            // On right click
             stationMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, function (event) {
                 openDialogMenu(event.pointerX, event.pointerY, (
                     <StyledMenu>
-                        <StyledMenuOption onClick={e => {
-                            console.log('GO')
-                        }}>
-                            This one
+                        <StyledMenuOption onClick={e => console.log('GO')}>
+                            Approach
+                        </StyledMenuOption>
+                        <StyledMenuOption onClick={e => console.log('not this one')}>
+                            Orbit at optimal
+                        </StyledMenuOption>
+                        <StyledMenuOption onClick={e => console.log('not this one')}>
+                            FTL drive
                         </StyledMenuOption>
                         <StyledMenuOption onClick={e => {
-                            console.log('not this one')
-                        }}>
-                            This one
+                            camera.target = stationMesh.position
+                            cameraTransformNode.position = stationMesh.position
+                            }}>
+                            Camera follow
                         </StyledMenuOption>
                     </StyledMenu>
                 ))
@@ -51,12 +56,12 @@ class Planets extends React.Component {
         })
 
         this.props.socket.on('clear_all', () => {
-            this.objectManager.removeAll()
+            this.meshManager.removeAll()
         })
     }
 
     componetWillUnmount () {
-        this.objectManager.removeAll()
+        this.meshManager.removeAll()
     }
 
     render () {
@@ -64,4 +69,4 @@ class Planets extends React.Component {
     }
 }
 
-export default Planets
+export default Stations

@@ -2,7 +2,7 @@ import uuid from 'uuid/v4'
 import BABYLON from 'babylonjs'
 import createColor from './color'
 
-export default function createMaterialBuilder (scene, objectManager) {
+export default function createMaterialBuilder (scene, meshManager) {
     function createStandardMaterial(options: {
         diffuseColor: [number],
         emissiveColor: [number]
@@ -21,7 +21,7 @@ export default function createMaterialBuilder (scene, objectManager) {
             const emissiveColor = createColor(options.emissiveColor)
             material.emissiveColor = emissiveColor
         }
-        objectManager.add(id, material)
+        meshManager.add(id, material)
         return material
     }
 

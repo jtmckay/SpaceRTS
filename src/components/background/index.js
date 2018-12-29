@@ -1,16 +1,16 @@
 import React from 'react'
 import BABYLON from 'babylonjs'
-import createObjectManager from 'bjs/objectManager'
+import createMeshManager from 'bjs/meshManager'
 // import createMeshBuilder from 'bjs/mesh'
 // import createMaterialBuilder from 'bjs/material'
 
 class Background extends React.Component {
-    objectManager = createObjectManager()
+    meshManager = createMeshManager()
 
     componentDidMount () {
         const { scene, cameraTransformNode } = this.props.babylon
-        // const meshBuilder = createMeshBuilder(scene, this.objectManager)
-        // const materialBuilder = createMaterialBuilder(scene, this.objectManager)
+        // const meshBuilder = createMeshBuilder(scene, this.meshManager)
+        // const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
         // Skybox
         var skybox = BABYLON.Mesh.CreateBox("skybox", 1000000, scene);
@@ -25,7 +25,7 @@ class Background extends React.Component {
     }
 
     componetWillUnmount () {
-        this.objectManager.removeAll()
+        this.meshManager.removeAll()
     }
 
     render () {

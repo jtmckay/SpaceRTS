@@ -8,10 +8,12 @@ function withGameSocket (Component) {
         state = {
             offset: 0,
             gameClock: null,
+            serverGameClock: null,
             users: [],
             registered: false,
             gamertag: getLocalStorage('gamertag')
         }
+
         socket = io('http://localhost:3080')
 
         componentDidMount () {
@@ -28,8 +30,8 @@ function withGameSocket (Component) {
                     })
                     this.socket.emit('game_connect')
                 })
-                this.socket.on('game_time', gameClock => {
-                    this.setState({ gameClock: gameClock-this.state.offset })
+                this.socket.on('game_time', serverGameClock => {
+                    this.setState({ serverGameClock, gameClock: serverGameClock ? serverGameClock - this.state.offset : null })
                 })
                 this.socket.on('user_list', userList => {
                     this.setState({ users: userList })
@@ -50,7 +52,6 @@ function withGameSocket (Component) {
         render () {
             return <Component
                 {...this.props}
-                setGameClock={time => this.setState({ gameClock: time && time - this.state.offset })}
                 gameClock={this.state.gameClock}
                 socket={this.socket}
                 iam={{ id: localId, name: this.state.gamertag }}

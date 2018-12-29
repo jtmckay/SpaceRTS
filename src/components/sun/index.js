@@ -1,19 +1,19 @@
 import React from 'react'
 import BABYLON from 'babylonjs'
-import createObjectManager from 'bjs/objectManager'
+import createMeshManager from 'bjs/meshManager'
 import createMeshBuilder from 'bjs/mesh'
 import createMaterialBuilder from 'bjs/material'
 import { createOmniLight } from 'bjs/light'
 
 class Sun extends React.Component {
-    objectManager = createObjectManager()
+    meshManager = createMeshManager()
 
     componentDidMount () {
         const { scene } = this.props.babylon
-        const meshBuilder = createMeshBuilder(scene, this.objectManager)
-        const materialBuilder = createMaterialBuilder(scene, this.objectManager)
+        const meshBuilder = createMeshBuilder(scene, this.meshManager)
+        const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        const sun = meshBuilder.createSphere({
+        const sun = meshBuilder.createSphere('sol', {
             diameterX: 5000,
             diameterY: 5000,
             diameterZ: 5000,
@@ -25,7 +25,7 @@ class Sun extends React.Component {
     }
 
     componetWillUnmount () {
-        this.objectManager.removeAll()
+        this.meshManager.removeAll()
     }
 
     render () {

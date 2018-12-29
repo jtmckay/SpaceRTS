@@ -11,7 +11,9 @@ import Settings from 'components/settings'
 import Sun from 'components/sun'
 import Planets from 'components/planets'
 import Stations from 'components/stations'
+import Ships from 'components/ships'
 import * as actions from 'utils/actions'
+import objectManagerFactory from 'utils/objectManager'
 
 const StyledGamePage = styled.div`
     width: 100%;
@@ -51,6 +53,8 @@ class GamePage extends React.Component {
         }
     }
 
+    objectManager = objectManagerFactory()
+
     componentDidMount () {
         // Get the canvas DOM element
         const canvas = document.getElementById('renderCanvas')
@@ -84,6 +88,7 @@ class GamePage extends React.Component {
 
         // run the render loop
         engine.runRenderLoop(() => {
+            this.objectManager.render()
             this.state.babylon.scene.render()
         })
 
@@ -91,7 +96,13 @@ class GamePage extends React.Component {
         resizeHandler = function () {
             engine.resize()
         }
+
+        this.props.socket.on('clear_all', () => {
+            this.objectManager.removeAll()
+        })
+
         window.addEventListener('resize', resizeHandler)
+        window.addEventListener('mousewheel', this.handleMousewheel)
         window.addEventListener('keydown', this.handleKeyDown)
         window.addEventListener('click', this.handleMouseDown)
         window.addEventListener('dblclick', this.handleDoubleMouseDown)
@@ -99,9 +110,22 @@ class GamePage extends React.Component {
 
     componentWillUnmount () {
         window.removeEventListener('resize', resizeHandler)
+        window.removeEventListener('mousewheel', this.handleMousewheel)
         window.removeEventListener('keydown', this.handleKeyDown)
         window.removeEventListener('click', this.handleMouseDown)
         window.removeEventListener('dblclick', this.handleDoubleMouseDown)
+    }
+
+    handleMousewheel = (event) => {
+        const { camera } = this.state.babylon
+        let newRadius = camera.radius + camera.radius / 4 * (event.deltaY / 100)
+        if (camera.lowerRadiusLimit <= newRadius && camera.upperRadiusLimit >= newRadius) {
+            camera.radius = newRadius
+        } else if (newRadius < camera.lowerRadiusLimit) {
+            camera.radius = camera.lowerRadiusLimit
+        } else if (newRadius > camera.upperRadiusLimit) {
+            camera.radius = camera.upperRadiusLimit
+        }
     }
 
     handleKeyDown = ({ key }) => {
@@ -128,6 +152,13 @@ class GamePage extends React.Component {
         const intersection = this.state.babylon.scene.pick(event.clientX, event.clientY, function (mesh) {
             return mesh.name === 'skybox'
         })
+        const unitsToOrder = []
+        const types = Object.keys(this.objectManager.objectMap[this.props.iam.id])
+        types.forEach(type => {
+            unitsToOrder.push(...Object.keys(this.objectManager.objectMap[this.props.iam.id][type]))
+        })
+        console.log('start', unitsToOrder, intersection.pickedPoint)
+        actions.vectorHeading(this.props.socket, unitsToOrder, intersection.pickedPoint)
         console.log('Double!', intersection.pickedPoint)
     }
 
@@ -149,8 +180,8 @@ class GamePage extends React.Component {
                         babylon={this.state.babylon}
                         playerCount={this.props.users.length}
                         gameClock={this.props.gameClock}
-                        startGame={() => actions.startGame(this.props.socket, this.props.setGameClock, this.props.users)}
-                        endGame={() => actions.endGame(this.props.socket, this.props.setGameClock)}
+                        startGame={() => actions.startGame(this.props.socket, this.props.users)}
+                        endGame={() => actions.endGame(this.props.socket)}
                         closeSettings={() => this.setState({ showSettings: false })}
                         setSettings={settings => this.setState({ settings })}
                         />
@@ -161,10 +192,9 @@ class GamePage extends React.Component {
                         <Sun babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
                         <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
                         <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Ships socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} objectManager={this.objectManager} />
                         {this.state.settings.tacticalOverlay &&
-                            <TacticalOveraly
-                                babylon={this.state.babylon}
-                                />
+                            <TacticalOveraly babylon={this.state.babylon} />
                         }
                     </NoDisplay>
                 }
