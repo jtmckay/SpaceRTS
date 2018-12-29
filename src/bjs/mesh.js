@@ -1,38 +1,33 @@
-import uuid from 'uuid/v4'
 import * as BABYLON from 'babylonjs';
 
-export default function createMeshBuilder (scene, objectManager) {
-    function createPlane(options: {
+export default function createMeshBuilder (scene, meshManager) {
+    function createPlane(id, options: {
         size: number,
         position: BABYLON.Vector3,
         rotation: BABYLON.Vector3,
         material: BABYLON.Material,
         alpha?: number
     }): BABYLON.Mesh {
-        const id = uuid()
         const plane = BABYLON.MeshBuilder.CreatePlane(id, options, scene)
-        objectManager.add(id, plane)
+        meshManager.add(id, plane)
         return plane
     }
     
-    function createLines(options: {
+    function createLines(id, options: {
         points: [BABYLON.Vector3],
         colors: [BABYLON.Color4]
     }): BABYLON.Mesh {
-        const id = uuid()
         const line = BABYLON.MeshBuilder.CreateLines(id, options, scene)
-        objectManager.add(id, line)
+        meshManager.add(id, line)
         return line
     }
     
-    //BABYLON.Mesh.FRONTSIDE
-    function createSphere(options: {
+    function createSphere (id, options: {
         diameterX: number,
         diameterY: number,
         position: BABYLON.Vector3,
         material: BABYLON.Material
     }) {
-        const id = uuid()
         var sphere = BABYLON.MeshBuilder.CreateSphere(id, options, scene)
     
         if (options.position) {
@@ -44,29 +39,40 @@ export default function createMeshBuilder (scene, objectManager) {
             sphere.material = new BABYLON.StandardMaterial('sphere', scene)
             console.log('Missing color for sphere')
         }
-    
-        sphere.actionManager = new BABYLON.ActionManager(scene)
-    
-        let oldColor
-        //ON MOUSE ENTER
-        sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, function (event) {
-            oldColor = sphere.material.emissiveColor
-            sphere.material.emissiveColor = BABYLON.Color3.Blue()
-        }));
-    
-        //ON MOUSE EXIT
-        sphere.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, function (event) {
-            sphere.material.emissiveColor = oldColor
-        }));
 
-        objectManager.add(id, sphere)
+        meshManager.add(id, sphere)
 
         return sphere
+    }
+
+    function createBox (id, options: {
+        size: number,
+        width: number,
+        height: number,
+        depth: number,
+        position: BABYLON.Vector3,
+        material: BABYLON.Material
+    }) {
+        const square = BABYLON.MeshBuilder.CreateBox(id, options, scene)
+        if (options.position) {
+            square.position = options.position
+        }
+        if (options.material) {
+            square.material = options.material
+        } else {
+            square.material = new BABYLON.StandardMaterial('square', scene)
+            console.log('Missing color for square')
+        }
+
+        meshManager.add(id, square)
+
+        return square
     }
 
     return {
         createPlane,
         createLines,
-        createSphere
+        createSphere,
+        createBox
     }
 }

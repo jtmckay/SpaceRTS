@@ -1,12 +1,19 @@
 import React from 'react'
+import withGameSocket from 'containers/withGameSocket'
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import { createArcRotateCamera } from 'bjs/camera'
-import { createHemisphericLight } from 'bjs/light'
-import createObjectManager from 'bjs/objectManager'
+import { createOmniLight } from 'bjs/light'
+import Dialog from 'components/dialog'
 import TacticalOveraly from 'components/tacticalOverlay'
 import Background from 'components/background'
 import Settings from 'components/settings'
+import Sun from 'components/sun'
+import Planets from 'components/planets'
+import Stations from 'components/stations'
+import Ships from 'components/ships'
+import * as actions from 'utils/actions'
+import objectManagerFactory from 'utils/objectManager'
 
 const StyledGamePage = styled.div`
     width: 100%;
@@ -26,10 +33,15 @@ const NoDisplay = styled.div`
 
 let resizeHandler
 
-class GamePage extends React.Component {
-    objectManager = createObjectManager()
+const dialogDefault = {
+    contents: null,
+    positionX: 0,
+    positionY: 0,
+}
 
+class GamePage extends React.Component {
     state = {
+        dialog: dialogDefault,
         showSettings: false,
         settings: {
             tacticalOverlay: true
@@ -37,18 +49,11 @@ class GamePage extends React.Component {
         babylon: {
             scene: null,
             camera: null,
-            canvas: null,
-            nextFrames: [],
-            callstack: [],
-            objectManager: {}
+            canvas: null
         }
     }
 
-    move (getMoves) {
-        this.state.babylon.callstack.push(() => {
-            return getMoves()
-        })
-    }
+    objectManager = objectManagerFactory()
 
     componentDidMount () {
         // Get the canvas DOM element
@@ -61,11 +66,20 @@ class GamePage extends React.Component {
         const createScene = () => {
             // Create a basic BJS Scene object
             const scene = new BABYLON.Scene(engine)
+
             camera = createArcRotateCamera(scene)
             camera.attachControl(canvas, false, false, false)
-            createHemisphericLight(scene)
+            createOmniLight(scene, camera.position, new BABYLON.Color3(.2, .2, .2))
 
-            this.setState({ babylon: { ...this.state.babylon, scene, camera, canvas } })
+            var cameraTransformNode = new BABYLON.TransformNode("root")
+            cameraTransformNode.position = new BABYLON.Vector3(0, 0, 0)
+            this.setState({ babylon: {
+                ...this.state.babylon,
+                scene,
+                camera,
+                canvas,
+                cameraTransformNode
+            } })
             return scene
         }
 
@@ -74,6 +88,7 @@ class GamePage extends React.Component {
 
         // run the render loop
         engine.runRenderLoop(() => {
+            this.objectManager.render()
             this.state.babylon.scene.render()
         })
 
@@ -81,32 +96,92 @@ class GamePage extends React.Component {
         resizeHandler = function () {
             engine.resize()
         }
+
+        this.props.socket.on('clear_all', () => {
+            this.objectManager.removeAll()
+        })
+
         window.addEventListener('resize', resizeHandler)
+        window.addEventListener('mousewheel', this.handleMousewheel)
         window.addEventListener('keydown', this.handleKeyDown)
+        window.addEventListener('click', this.handleMouseDown)
+        window.addEventListener('dblclick', this.handleDoubleMouseDown)
     }
 
     componentWillUnmount () {
         window.removeEventListener('resize', resizeHandler)
+        window.removeEventListener('mousewheel', this.handleMousewheel)
         window.removeEventListener('keydown', this.handleKeyDown)
+        window.removeEventListener('click', this.handleMouseDown)
+        window.removeEventListener('dblclick', this.handleDoubleMouseDown)
+    }
+
+    handleMousewheel = (event) => {
+        const { camera } = this.state.babylon
+        let newRadius = camera.radius + camera.radius / 4 * (event.deltaY / 100)
+        if (camera.lowerRadiusLimit <= newRadius && camera.upperRadiusLimit >= newRadius) {
+            camera.radius = newRadius
+        } else if (newRadius < camera.lowerRadiusLimit) {
+            camera.radius = camera.lowerRadiusLimit
+        } else if (newRadius > camera.upperRadiusLimit) {
+            camera.radius = camera.upperRadiusLimit
+        }
     }
 
     handleKeyDown = ({ key }) => {
         console.log('key', key)
         if (key === 'Escape') {
-            this.setState({ showSettings: !this.state.showSettings })
+            if (this.state.dialog.contents) {
+                this.setState({ dialog: dialogDefault })
+            } else {
+                this.setState({ showSettings: !this.state.showSettings })
+            }
         }
         if (key === 'F10') {
             this.setState({ showSettings: !this.state.showSettings })
         }
     }
 
+    handleMouseDown = () => {
+        if (this.state.dialog.contents) {
+            this.closeDialogMenu()
+        }
+    }
+
+    handleDoubleMouseDown = (event) => {
+        const intersection = this.state.babylon.scene.pick(event.clientX, event.clientY, function (mesh) {
+            return mesh.name === 'skybox'
+        })
+        const unitsToOrder = []
+        const types = Object.keys(this.objectManager.objectMap[this.props.iam.id])
+        types.forEach(type => {
+            unitsToOrder.push(...Object.keys(this.objectManager.objectMap[this.props.iam.id][type]))
+        })
+        console.log('start', unitsToOrder, intersection.pickedPoint)
+        actions.vectorHeading(this.props.socket, unitsToOrder, intersection.pickedPoint)
+        console.log('Double!', intersection.pickedPoint)
+    }
+
+    openDialogMenu = (positionX, positionY, contents) => {
+        this.setState({ dialog: { positionX, positionY, contents } })
+    }
+
+    closeDialogMenu = () => {
+        this.setState({ dialog: dialogDefault })
+    }
+
     render () {
         return (
             <StyledGamePage>
                 <StyledCanvas id="renderCanvas"></StyledCanvas>
+                <Dialog {...this.state.dialog} />
                 {this.state.showSettings &&
                     <Settings
                         babylon={this.state.babylon}
+                        playerCount={this.props.users.length}
+                        gameClock={this.props.gameClock}
+                        startGame={() => actions.startGame(this.props.socket, this.props.users)}
+                        endGame={() => actions.endGame(this.props.socket)}
                         closeSettings={() => this.setState({ showSettings: false })}
                         setSettings={settings => this.setState({ settings })}
                         />
@@ -114,6 +189,10 @@ class GamePage extends React.Component {
                 {this.state.babylon.scene &&
                     <NoDisplay>
                         <Background babylon={this.state.babylon} />
+                        <Sun babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Planets socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Stations socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} />
+                        <Ships socket={this.props.socket} iam={this.props.iam} babylon={this.state.babylon} openDialogMenu={this.openDialogMenu} objectManager={this.objectManager} />
                         {this.state.settings.tacticalOverlay &&
                             <TacticalOveraly babylon={this.state.babylon} />
                         }
@@ -124,4 +203,4 @@ class GamePage extends React.Component {
     }
 }
 
-export default GamePage
+export default withGameSocket(GamePage)

@@ -50,6 +50,7 @@ const OptionValue = styled.div`
 
 class Settings extends React.Component {
     render () {
+        const { closeSettings } = this.props
         const { camera, canvas } = this.props.babylon
         return (
             <StyledOverlay>
@@ -74,6 +75,25 @@ class Settings extends React.Component {
                                 <button onClick={() => {
                                     camera.attachControl(canvas, true)
                                 }}>Attach Headset</button>
+                            </OptionValue>
+                        </Option>
+                        <Option>
+                            <OptionLabel>
+                                Current # Players: {this.props.playerCount}
+                            </OptionLabel>
+                            <OptionValue>
+                                {
+                                    this.props.gameClock
+                                    ?
+                                        <button onClick={() => {
+                                            this.props.endGame()
+                                        }}>END GAME</button>
+                                    :
+                                        <button onClick={() => {
+                                            this.props.startGame()
+                                            closeSettings()
+                                        }}>Start Game</button>
+                                }
                             </OptionValue>
                         </Option>
                     </Column>
