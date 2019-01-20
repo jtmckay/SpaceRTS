@@ -88,7 +88,7 @@ class GamePage extends React.Component {
 
         // run the render loop
         engine.runRenderLoop(() => {
-            this.objectManager.render()
+            this.objectManager.preRender()
             this.state.babylon.scene.render()
         })
 
@@ -180,7 +180,7 @@ class GamePage extends React.Component {
                         babylon={this.state.babylon}
                         playerCount={this.props.users.length}
                         gameClock={this.props.gameClock}
-                        startGame={() => actions.startGame(this.props.socket, this.props.users)}
+                        startGame={() => actions.startGame(this.props.socket, [...this.props.users, {}, {}, {}, {}, {}, {}, {}])}
                         endGame={() => actions.endGame(this.props.socket)}
                         closeSettings={() => this.setState({ showSettings: false })}
                         setSettings={settings => this.setState({ settings })}

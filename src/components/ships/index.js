@@ -16,7 +16,8 @@ class Ships extends React.Component {
         const meshBuilder = createMeshBuilder(scene, this.meshManager)
         const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        this.props.socket.on('ship', ({ id, owner, type, color, position }) => {
+        this.props.socket.on('ship_add', ship => {
+            const { id, type, color, position } = ship
             const shipMesh = meshBuilder.createSphere(id, {
                 ...shipShapes[type],
                 material: materialBuilder.createStandardMaterial({ emissiveColor: color }),
@@ -48,7 +49,12 @@ class Ships extends React.Component {
                 ))
             }))
 
-            objectManager.add(owner, type, id, shipMesh, this.meshManager)
+            objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager })
+        })
+
+        this.props.socket.on('ship_movement_start', ship => {
+            const { id, heading } = ship
+            objectManager.move(id, heading)
         })
     }
 

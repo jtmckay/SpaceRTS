@@ -14,7 +14,7 @@ class Stations extends React.Component {
         const meshBuilder = createMeshBuilder(scene, this.meshManager)
         const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        this.props.socket.on('station', ({ id, owner, size, color, position }) => {
+        this.props.socket.on('station_add', ({ id, owner, size, color, position }) => {
             const stationMesh = meshBuilder.createBox(id, {
                 size,
                 material: materialBuilder.createStandardMaterial({ emissiveColor: color }),

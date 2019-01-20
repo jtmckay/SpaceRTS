@@ -13,7 +13,7 @@ class Planets extends React.Component {
         const meshBuilder = createMeshBuilder(scene, this.meshManager)
         const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        this.props.socket.on('planet', ({ id, size, color, position }) => {
+        this.props.socket.on('planet_add', ({ id, size, color, position }) => {
             const planetMesh = meshBuilder.createSphere(id, {
                 diameterX: size,
                 diameterY: size,
