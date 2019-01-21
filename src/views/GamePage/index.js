@@ -159,9 +159,7 @@ class GamePage extends React.Component {
         })
         const objs = Object.values(this.objectManager.objectMap).filter(obj => obj.ownerId === this.props.iam.id)
         const unitsToOrder = objs.map(obj => obj.id)
-        console.log('start', unitsToOrder, intersection.pickedPoint)
-        actions.vectorHeading(this.props.socket, unitsToOrder, intersection.pickedPoint)
-        console.log('Double!', intersection.pickedPoint)
+        actions.vectorHeading(this.props.socket, this.state.babylon.camera, unitsToOrder, intersection.pickedPoint)
     }
 
     openDialogMenu = (positionX, positionY, contents) => {

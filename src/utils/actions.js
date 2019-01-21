@@ -42,8 +42,17 @@ export function stop (socket, unitsToOrder) {
     })
 }
 
-export function vectorHeading (socket, unitsToOrder, target, speed) {
-    socket.emit('command_units_vector_heading', { id: localId, unitsToOrder, target: [target.x, target.y, target.z], speed }, response => {
+export function vectorHeading (socket, camera, unitsToOrder, target, speed) {
+    socket.emit('command_units_vector_heading', {
+        id: localId,
+        unitsToOrder,
+        target: [
+            target.x - camera.target.x,
+            target.y - camera.target.y,
+            target.z - camera.target.z
+        ],
+        speed
+    }, response => {
         if (response) {
             console.log('Vector locked in')
         } else {
