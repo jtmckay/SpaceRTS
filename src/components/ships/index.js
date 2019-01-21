@@ -52,9 +52,14 @@ class Ships extends React.Component {
             objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager })
         })
 
-        this.props.socket.on('ship_movement_start', ship => {
-            const { id, heading } = ship
+        this.props.socket.on('ship_movement_start', data => {
+            const { id, heading } = data
             objectManager.move(id, heading)
+        })
+
+        this.props.socket.on('ship_movement_stop', data => {
+            const { id, position } = data
+            objectManager.stop(id, position)
         })
     }
 

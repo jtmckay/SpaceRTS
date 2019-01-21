@@ -9,6 +9,11 @@ export default function () {
         objectMap[id].heading = heading
     }
 
+    function stop (id, position) {
+        delete movementIds[id]
+        objectMap[id].position = position
+    }
+
     function preRender () {
         let time = Date.now()
         Object.keys(movementIds).forEach(id => {
@@ -20,11 +25,11 @@ export default function () {
     }
 
     function add (obj) {
-        let { id, owner, type, mesh, meshManager } = obj
+        let { id, ownerId, type, mesh, meshManager } = obj
         let error = false
 
-        if (!owner) {
-            owner = 'non-player'
+        if (!ownerId) {
+            ownerId = 'non-player'
         }
         if (!type) {
             console.log('error adding object to object manager. Type is required')
@@ -46,7 +51,7 @@ export default function () {
             return
         }
 
-        console.log('owner', owner, type, id)
+        console.log('ownerId', ownerId, type, id)
         if (objectMap[id]) {
             remove(id)
             console.log('replaced object', id)
@@ -83,6 +88,7 @@ export default function () {
         add,
         remove,
         removeAll,
-        move
+        move,
+        stop
     }
 }

@@ -5,6 +5,8 @@ function createArcRotateCamera (scene: BABYLON.Scene, target: BABYLON.Vector3) {
     camera.inertia = 0
     camera.lowerRadiusLimit = 10
     camera.upperRadiusLimit = 800
+    camera.angularSensibilityX = 120
+    camera.angularSensibilityY = 120
     camera.maxZ = 1000000
 
     return camera

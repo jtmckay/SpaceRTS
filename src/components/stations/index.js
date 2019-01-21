@@ -14,7 +14,7 @@ class Stations extends React.Component {
         const meshBuilder = createMeshBuilder(scene, this.meshManager)
         const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
-        this.props.socket.on('station_add', ({ id, owner, size, color, position }) => {
+        this.props.socket.on('station_add', ({ id, ownerId, size, color, position }) => {
             const stationMesh = meshBuilder.createBox(id, {
                 size,
                 material: materialBuilder.createStandardMaterial({ emissiveColor: color }),
@@ -46,7 +46,7 @@ class Stations extends React.Component {
                 ))
             }))
 
-            if (owner === this.props.iam.id) {
+            if (ownerId === this.props.iam.id) {
                 camera.target = stationMesh.position
                 camera.alpha = -.6 * Math.PI
                 camera.beta = Math.PI / 2.5

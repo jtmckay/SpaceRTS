@@ -137,6 +137,11 @@ class GamePage extends React.Component {
                 this.setState({ showSettings: !this.state.showSettings })
             }
         }
+        if (key === ' ') {
+            const objs = Object.values(this.objectManager.objectMap).filter(obj => obj.ownerId === this.props.iam.id)
+            const unitsToOrder = objs.map(obj => obj.id)
+            actions.stop(this.props.socket, unitsToOrder)
+        }
         if (key === 'F10') {
             this.setState({ showSettings: !this.state.showSettings })
         }
@@ -152,11 +157,8 @@ class GamePage extends React.Component {
         const intersection = this.state.babylon.scene.pick(event.clientX, event.clientY, function (mesh) {
             return mesh.name === 'skybox'
         })
-        const unitsToOrder = []
-        const types = Object.keys(this.objectManager.objectMap[this.props.iam.id])
-        types.forEach(type => {
-            unitsToOrder.push(...Object.keys(this.objectManager.objectMap[this.props.iam.id][type]))
-        })
+        const objs = Object.values(this.objectManager.objectMap).filter(obj => obj.ownerId === this.props.iam.id)
+        const unitsToOrder = objs.map(obj => obj.id)
         console.log('start', unitsToOrder, intersection.pickedPoint)
         actions.vectorHeading(this.props.socket, unitsToOrder, intersection.pickedPoint)
         console.log('Double!', intersection.pickedPoint)

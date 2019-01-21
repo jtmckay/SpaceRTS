@@ -32,8 +32,18 @@ export function approach (socket, unitsToOrder, target) {
     })
 }
 
-export function vectorHeading (socket, unitsToOrder, target) {
-    socket.emit('command_units_vector_heading', { id: localId, unitsToOrder, target }, response => {
+export function stop (socket, unitsToOrder) {
+    socket.emit('command_units_stop', { id: localId, unitsToOrder }, response => {
+        if (response) {
+            console.log('Stopping')
+        } else {
+            console.log('Failed to stop')
+        }
+    })
+}
+
+export function vectorHeading (socket, unitsToOrder, target, speed) {
+    socket.emit('command_units_vector_heading', { id: localId, unitsToOrder, target: [target.x, target.y, target.z], speed }, response => {
         if (response) {
             console.log('Vector locked in')
         } else {
