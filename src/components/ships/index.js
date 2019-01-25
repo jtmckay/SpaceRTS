@@ -48,12 +48,12 @@ class Ships extends React.Component {
                 ))
             }))
 
-            const button = BABYLON.GUI.Button.CreateSimpleButton('btn');
-            button.color = 'red'
-            button.width = '20px';
-            button.height = '20px';
+            // const button = BABYLON.GUI.Button.CreateSimpleButton('btn');
+            // button.color = 'red'
+            // button.width = '20px';
+            // button.height = '20px';
 
-            objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager, overlayControl: button })
+            objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager })
         })
 
         this.props.socket.on('ship_movement_start', data => {

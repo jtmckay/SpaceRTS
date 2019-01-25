@@ -3,7 +3,7 @@ import withGameSocket from 'containers/withGameSocket'
 import styled from 'styled-components'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
-import { createArcRotateCamera } from 'bjs/camera'
+import { createWebVrFreeCamera } from 'bjs/camera'
 import { createOmniLight } from 'bjs/light'
 import Dialog from 'components/dialog'
 import TacticalOveraly from 'components/tacticalOverlay'
@@ -43,15 +43,14 @@ const dialogDefault = {
 class GamePage extends React.Component {
     state = {
         dialog: dialogDefault,
-        showSettings: false,
+        showSettings: true,
         settings: {
             tacticalOverlay: true
         },
         babylon: {
             scene: null,
             camera: null,
-            canvas: null,
-            overlay: []
+            canvas: null
         }
     }
 
@@ -69,21 +68,14 @@ class GamePage extends React.Component {
             // Create a basic BJS Scene object
             const scene = new BABYLON.Scene(engine)
 
-            camera = createArcRotateCamera(scene)
-            camera.attachControl(canvas, false, false, false)
+            camera = createWebVrFreeCamera(scene)
             createOmniLight(scene, camera.position, new BABYLON.Color3(.2, .2, .2))
 
-            var advancedDynamicTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI');
-            this.objectManager = objectManagerFactory(advancedDynamicTexture)
-
-            scene.onBeforeCameraRenderObservable.add(() => {
-                Object.values(this.objectManager.overlay).forEach(({ control, mesh }) => {
-                    control.moveToVector3(mesh.position, scene)
-                })
-            })
+            this.objectManager = objectManagerFactory()
 
             var cameraTransformNode = new BABYLON.TransformNode('root')
             cameraTransformNode.position = new BABYLON.Vector3(0, 0, 0)
+
             this.setState({ babylon: {
                 ...this.state.babylon,
                 scene,
@@ -125,6 +117,10 @@ class GamePage extends React.Component {
         window.removeEventListener('keydown', this.handleKeyDown)
         window.removeEventListener('click', this.handleMouseDown)
         window.removeEventListener('dblclick', this.handleDoubleMouseDown)
+    }
+
+    attachVr () {
+        this.state.babylon.camera.attachControl(this.state.babylon.canvas)
     }
 
     handleMousewheel = (event) => {
@@ -188,6 +184,7 @@ class GamePage extends React.Component {
                 <Dialog {...this.state.dialog} />
                 {this.state.showSettings &&
                     <Settings
+                        attachVr={() => this.attachVr()}
                         babylon={this.state.babylon}
                         playerCount={this.props.users.length}
                         gameClock={this.props.gameClock}

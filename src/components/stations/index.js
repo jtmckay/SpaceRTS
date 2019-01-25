@@ -47,10 +47,8 @@ class Stations extends React.Component {
             }))
 
             if (ownerId === this.props.iam.id) {
-                camera.target = stationMesh.position
-                camera.alpha = -.6 * Math.PI
-                camera.beta = Math.PI / 2.5
-                camera.radius = 150
+                console.log('camera', camera)
+                camera.position = stationMesh.position
                 cameraTransformNode.position = stationMesh.position
             }
         })

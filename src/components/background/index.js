@@ -8,20 +8,18 @@ class Background extends React.Component {
     meshManager = createMeshManager()
 
     componentDidMount () {
-        const { scene, cameraTransformNode } = this.props.babylon
+        const { scene } = this.props.babylon
         // const meshBuilder = createMeshBuilder(scene, this.meshManager)
         // const materialBuilder = createMaterialBuilder(scene, this.meshManager)
 
         // Skybox
-        var skybox = BABYLON.Mesh.CreateBox("skybox", 1000000, scene);
+        var skybox = BABYLON.Mesh.CreateBox("skybox", 50000, scene);
         var skyboxMaterial = new BABYLON.StandardMaterial("skybox", scene);
         skyboxMaterial.backFaceCulling = false;
         skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/textures/StarSky", scene);
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
         skyboxMaterial.disableLighting = true;
         skybox.material = skyboxMaterial;
-
-        skybox.parent = cameraTransformNode
     }
 
     componetWillUnmount () {

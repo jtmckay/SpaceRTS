@@ -1,9 +1,8 @@
 import { getPosition } from 'algorithms/movement'
 
-export default function (advancedDynamicTexture) {
+export default function () {
     const objectMap = {}
     const movementIds = {}
-    const overlay = {}
 
     function move (id, heading) {
         movementIds[id] = true
@@ -26,7 +25,7 @@ export default function (advancedDynamicTexture) {
     }
 
     function add (obj) {
-        let { id, ownerId, type, mesh, meshManager, overlayControl } = obj
+        let { id, ownerId, type, mesh, meshManager } = obj
         let error = false
 
         if (!ownerId) {
@@ -63,21 +62,10 @@ export default function (advancedDynamicTexture) {
         if (obj.heading) {
             movementIds[id] = true
         }
-
-        if (overlayControl) {
-            advancedDynamicTexture.addControl(overlayControl)
-            overlay[id] = {
-                id,
-                control: overlayControl,
-                mesh
-            }
-        }
     }
 
     function remove (id) {
         objectMap[id].meshManager.remove(id)
-        advancedDynamicTexture.removeControl(overlay[id].control)
-        delete overlay[id]
         delete objectMap[id]
         delete movementIds[id]
     }
@@ -90,7 +78,6 @@ export default function (advancedDynamicTexture) {
     }
 
     return {
-        overlay,
         objectMap,
         preRender,
         add,

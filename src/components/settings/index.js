@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { createWebVRFreeCamera } from 'bjs/camera'
 
 const StyledSettings = styled.div`
     width: 800px;
@@ -80,9 +79,7 @@ class Settings extends React.Component {
                                 Virtual Reality
                             </OptionLabel>
                             <OptionValue>
-                                <button onClick={() => {
-                                    attachVr()
-                                }}>Attach Headset</button>
+                                <button onClick={() => attachVr()}>Attach Headset</button>
                             </OptionValue>
                         </Option>
                         <Option>
