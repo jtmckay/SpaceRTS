@@ -5,7 +5,6 @@ import createMeshBuilder from 'bjs/mesh'
 import createMaterialBuilder from 'bjs/material'
 import { StyledMenu, StyledMenuOption } from 'components/dialog/styles'
 import shipShapes from 'components/ships/shapes'
-import * as actions from 'utils/actions'
 
 class Ships extends React.Component {
     meshManager = createMeshManager()
@@ -49,7 +48,12 @@ class Ships extends React.Component {
                 ))
             }))
 
-            objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager })
+            const button = BABYLON.GUI.Button.CreateSimpleButton('btn');
+            button.color = 'red'
+            button.width = '20px';
+            button.height = '20px';
+
+            objectManager.add({ ...ship, mesh: shipMesh, meshManager: this.meshManager, overlayControl: button })
         })
 
         this.props.socket.on('ship_movement_start', data => {

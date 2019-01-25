@@ -1,8 +1,9 @@
 import { getPosition } from 'algorithms/movement'
 
-export default function () {
+export default function (advancedDynamicTexture) {
     const objectMap = {}
     const movementIds = {}
+    const overlay = {}
 
     function move (id, heading) {
         movementIds[id] = true
@@ -25,7 +26,7 @@ export default function () {
     }
 
     function add (obj) {
-        let { id, ownerId, type, mesh, meshManager } = obj
+        let { id, ownerId, type, mesh, meshManager, overlayControl } = obj
         let error = false
 
         if (!ownerId) {
@@ -51,24 +52,32 @@ export default function () {
             return
         }
 
-        console.log('ownerId', ownerId, type, id)
+        // console.log('ownerId', ownerId, type, id)
         if (objectMap[id]) {
             remove(id)
             console.log('replaced object', id)
-            objectMap[id] = obj
-            if (obj.heading) {
-                movementIds[id] = true
-            }
-        } else {
-            objectMap[id] = obj
-            if (obj.heading) {
-                movementIds[id] = true
+        }
+        
+        objectMap[id] = obj
+
+        if (obj.heading) {
+            movementIds[id] = true
+        }
+
+        if (overlayControl) {
+            advancedDynamicTexture.addControl(overlayControl)
+            overlay[id] = {
+                id,
+                control: overlayControl,
+                mesh
             }
         }
     }
 
     function remove (id) {
         objectMap[id].meshManager.remove(id)
+        advancedDynamicTexture.removeControl(overlay[id].control)
+        delete overlay[id]
         delete objectMap[id]
         delete movementIds[id]
     }
@@ -76,13 +85,12 @@ export default function () {
     function removeAll () {
         const ids = Object.keys(objectMap)
         ids.forEach(id => {
-            objectMap[id].meshManager.remove(id)
-            delete objectMap[id]
-            delete movementIds[id]
+            remove(id)
         })
     }
 
     return {
+        overlay,
         objectMap,
         preRender,
         add,

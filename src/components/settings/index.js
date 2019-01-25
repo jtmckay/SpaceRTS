@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { createWebVRFreeCamera } from 'bjs/camera'
 
 const StyledSettings = styled.div`
     width: 800px;
@@ -50,8 +51,15 @@ const OptionValue = styled.div`
 
 class Settings extends React.Component {
     render () {
-        const { closeSettings } = this.props
-        const { camera, canvas } = this.props.babylon
+        const {
+            attachVr,
+            closeSettings,
+            endGame,
+            gameClock,
+            playerCount,
+            startGame
+        } = this.props
+
         return (
             <StyledOverlay>
                 <StyledSettings>
@@ -73,24 +81,24 @@ class Settings extends React.Component {
                             </OptionLabel>
                             <OptionValue>
                                 <button onClick={() => {
-                                    camera.attachControl(canvas, true)
+                                    attachVr()
                                 }}>Attach Headset</button>
                             </OptionValue>
                         </Option>
                         <Option>
                             <OptionLabel>
-                                Current # Players: {this.props.playerCount}
+                                Current # Players: {playerCount}
                             </OptionLabel>
                             <OptionValue>
                                 {
-                                    this.props.gameClock
+                                    gameClock
                                     ?
                                         <button onClick={() => {
-                                            this.props.endGame()
+                                            endGame()
                                         }}>END GAME</button>
                                     :
                                         <button onClick={() => {
-                                            this.props.startGame()
+                                            startGame()
                                             closeSettings()
                                         }}>Start Game</button>
                                 }
